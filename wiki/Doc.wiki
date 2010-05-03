@@ -1,0 +1,5 @@
+#summary How to work with AR.
+
+= Introduction =
+
+ * How to create your own marker? [http://www.artoolworks.com/support/library/Creating_and_training_new_ARToolKit_markers]
