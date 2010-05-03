@@ -1,10 +1,8 @@
 /* 
- * PROJECT: NyARToolkit Java3d sample program.
+ * PROJECT: EJJ AR Java3d sample program.
  * --------------------------------------------------------------------------------
  * The MIT License
- * Copyright (c) 2008 nyatla
- * airmail(at)ebony.plala.or.jp
- * http://nyatla.jp/nyartoolkit/
+ * Copyright (c) 2010 ejj
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,51 +25,71 @@
 package org.ejj.java.java3d.sample;
 
 import java.awt.BorderLayout;
-import javax.media.j3d.*;
+import java.awt.Insets;
 
-import com.sun.j3d.utils.universe.*;
-import java.awt.*;
+import javax.media.j3d.Appearance;
+import javax.media.j3d.Background;
+import javax.media.j3d.BoundingSphere;
+import javax.media.j3d.BranchGroup;
+import javax.media.j3d.Canvas3D;
+import javax.media.j3d.Locale;
+import javax.media.j3d.Material;
+import javax.media.j3d.Node;
+import javax.media.j3d.PhysicalBody;
+import javax.media.j3d.PhysicalEnvironment;
+import javax.media.j3d.TextureAttributes;
+import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
+import javax.media.j3d.View;
+import javax.media.j3d.ViewPlatform;
+import javax.media.j3d.VirtualUniverse;
 import javax.swing.JFrame;
-import javax.vecmath.*;
+import javax.vecmath.Vector3d;
 
+import jp.nyatla.nyartoolkit.core.NyARCode;
+import jp.nyatla.nyartoolkit.java3d.utils.J3dNyARParam;
+import jp.nyatla.nyartoolkit.java3d.utils.NyARSingleMarkerBehaviorHolder;
+import jp.nyatla.nyartoolkit.java3d.utils.NyARSingleMarkerBehaviorListener;
 
-import jp.nyatla.nyartoolkit.core.*;
-import jp.nyatla.nyartoolkit.java3d.utils.*;
-
-import com.sun.j3d.utils.geometry.ColorCube;
+import com.sun.j3d.utils.geometry.Box;
+import com.sun.j3d.utils.geometry.Cone;
 import com.sun.j3d.utils.geometry.Cylinder;
+import com.sun.j3d.utils.geometry.Sphere;
 import com.sun.j3d.utils.image.TextureLoader;
+import com.sun.j3d.utils.universe.SimpleUniverse;
 
 /**
- * Java3Dサンプルプログラム
- * 単一マーカー追跡用のBehaviorを使って、背景と１個のマーカーに連動した
- * TransformGroupを動かします。
+ * Java3D
+ * Behavior
+ * TransformGroup
  *
  */
 public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 {
 	private static final long serialVersionUID = -8472866262481865377L;
 
+	
+	
 	private final String CARCODE_FILE = "/opt/jmf/Data/ejj";
 
 	private final String PARAM_FILE = "/opt/jmf/Data/camera_para.dat";
 
-	//NyARToolkit関係
+	//NyARToolkit
 	private NyARSingleMarkerBehaviorHolder nya_behavior;
-
+	
 	private J3dNyARParam ar_param;
 
-	//universe関係
+	//universe
 	private Canvas3D canvas;
 
 	private Locale locale;
 
 	private VirtualUniverse universe;
 
-	public static void main(String[] args)
-	{
+	
+	public void getAR(ARJava3D frame){
 		try {
-			ARJava3D frame = new ARJava3D();
+			
 
 			frame.setVisible(true);
 			Insets ins = frame.getInsets();
@@ -82,12 +100,13 @@ public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 	public void onUpdate(boolean i_is_marker_exist, Transform3D i_transform3d)
 	{
 		/*
 		 * TODO:Please write your behavior operation code here.
-		 * マーカーの姿勢を元に他の３Dオブジェクトを操作するときは、ここに処理を書きます。*/
+		 */
 
 	}
 
@@ -96,18 +115,22 @@ public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 		nya_behavior.start();
 	}
 
-	public ARJava3D() throws Exception
+	public ARJava3D(int geom, String x, String y, String z, String bgPath) throws Exception
 	{
-		super("Java3D Example NyARToolkit");
+		super("EJJ Java3D AR");
+		
+		System.out.println(x+" , "+y+" , "+z);
+		System.out.println(geom);
+		System.out.println(bgPath);
 
-		//NyARToolkitの準備
+		//NyARToolkit
 		NyARCode ar_code = new NyARCode(16, 16);
 		ar_code.loadARPattFromFile(CARCODE_FILE);
 		ar_param = new J3dNyARParam();
 		ar_param.loadARParamFromFile(PARAM_FILE);
 		ar_param.changeScreenSize(640, 480);
 
-		//localeの作成とlocateとviewの設定
+		
 		universe = new VirtualUniverse();
 		locale = new Locale(universe);
 		canvas = new Canvas3D(SimpleUniverse.getPreferredConfiguration());
@@ -118,13 +141,13 @@ public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 		view.setPhysicalBody(new PhysicalBody());
 		view.setPhysicalEnvironment(new PhysicalEnvironment());
 
-		//視界の設定(カメラ設定から取得)
+		
 		Transform3D camera_3d = ar_param.getCameraTransform();
 		view.setCompatibilityModeEnable(true);
 		view.setProjectionPolicy(View.PERSPECTIVE_PROJECTION);
 		view.setLeftProjection(camera_3d);
 
-		//視点設定(0,0,0から、Y軸を180度回転してZ+方向を向くようにする。)
+		
 		TransformGroup viewGroup = new TransformGroup();
 		Transform3D viewTransform = new Transform3D();
 		viewTransform.rotY(Math.PI);
@@ -135,7 +158,7 @@ public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 		viewRoot.addChild(viewGroup);
 		locale.addBranchGraph(viewRoot);
 
-		//バックグラウンドの作成
+		
 		Background background = new Background();
 		BoundingSphere bounds = new BoundingSphere();
 		bounds.setRadius(10.0);
@@ -145,66 +168,81 @@ public class ARJava3D extends JFrame implements NyARSingleMarkerBehaviorListener
 		BranchGroup root = new BranchGroup();
 		root.addChild(background);
 
-		//TransformGroupで囲ったシーングラフの作成
+		//TransformGroup
 		TransformGroup transform = new TransformGroup();
 		transform.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
-		transform.addChild(createSceneGraph());
+		transform.addChild(createSceneGraph(geom, x,y,z, bgPath));
 		root.addChild(transform);
 
-		//NyARToolkitのBehaviorを作る。(マーカーサイズはメートルで指定すること)
+		//NyARToolkit & Behavior
 		nya_behavior = new NyARSingleMarkerBehaviorHolder(ar_param, 30f, ar_code, 0.08);
-		//Behaviorに連動するグループをセット
+		//Behavior
 		nya_behavior.setTransformGroup(transform);
 		nya_behavior.setBackGround(background);
 
-		//出来たbehaviorをセット
+		//behavior
 		root.addChild(nya_behavior.getBehavior());
 		nya_behavior.setUpdateListener(this);
 
-		//表示ブランチをLocateにセット
+		
 		locale.addBranchGraph(root);
 
-		//ウインドウの設定
+		
 		setLayout(new BorderLayout());
 		add(canvas, BorderLayout.CENTER);
 	}
 
 	/**
-	 * シーングラフを作って、そのノードを返す。
-	 * このノードは40mmの色つき立方体を表示するシーン。ｚ軸を基準に20mm上に浮かせてる。
+	 
+	 * @param bgPath 
+	 * @param z 
+	 * @param y 
+	 * @param x 
+	 * @param geom 
 	 * @return
 	 */
-	private Node createSceneGraph()
+	private Node createSceneGraph(int geom, String x, String y, String z, String bgPath)
 	{
-//		TransformGroup tg = new TransformGroup();
-//		Transform3D mt = new Transform3D();
-//		mt.setTranslation(new Vector3d(0.00, 0.0, 20 * 0.001));
-//		// 大きさ 40mmの色付き立方体を、Z軸上で20mm動かして配置）
-//		tg.setTransform(mt);
-//		tg.addChild(new ColorCube(20 * 0.001));
+
 		
-		java.net.URL earthImage = this.getClass().getResource("/resources/images/earth.jpg");
-		System.out.println(earthImage.toString());
-		Appearance apEarth= new Appearance();
+		if(bgPath == null) bgPath = "/home/jdamico/workspace/ejj/resources/images/earth.jpg";
+		
+		
+		Appearance apBg= new Appearance();
         Material mm = new Material();
         mm.setLightingEnable(true);
-        apEarth.setMaterial(mm);
+        apBg.setMaterial(mm);
 		
 		
 		TextureAttributes texAttr = new TextureAttributes();
 	 	texAttr.setTextureMode(TextureAttributes.REPLACE);
 		
-		TextureLoader earthTex = new TextureLoader(earthImage, new String("RGB"),
+	 	
+	 	
+		TextureLoader bgTex = new TextureLoader(bgPath, new String("RGB"),
         TextureLoader.BY_REFERENCE | TextureLoader.Y_UP, this);
-        if (earthTex != null) apEarth.setTexture(earthTex.getTexture()); apEarth.setTextureAttributes(texAttr);
+        if (bgTex != null) apBg.setTexture(bgTex.getTexture()); apBg.setTextureAttributes(texAttr);
 		
-		Transform3D cylinderMat = new Transform3D();
-		TransformGroup cylinderTrans = new TransformGroup(cylinderMat);
-		cylinderMat.set(new Vector3d(0.00, 0.0, 20 * 0.001));
-		cylinderTrans.setTransform(cylinderMat);
-		cylinderTrans.addChild(new Cylinder(.06f, 0.16f,Cylinder.GENERATE_NORMALS | Cylinder.GENERATE_TEXTURE_COORDS | Cylinder.GENERATE_TEXTURE_COORDS_Y_UP, apEarth));
+		Transform3D object3dMat = new Transform3D();
+		TransformGroup object3dTrans = new TransformGroup(object3dMat);
+		object3dMat.set(new Vector3d(0.00, 0.0, 20 * 0.001));
+		object3dTrans.setTransform(object3dMat);
 		
 		
-		return cylinderTrans;
+		Float xf = Float.valueOf(x);
+		Float yf = Float.valueOf(y);
+		Float zf = Float.valueOf(z);
+		
+		if(geom == 1){
+			object3dTrans.addChild(new Box(xf, yf, zf, Cylinder.GENERATE_NORMALS | Cylinder.GENERATE_TEXTURE_COORDS | Cylinder.GENERATE_TEXTURE_COORDS_Y_UP, apBg));
+		}else if(geom == 2){
+			object3dTrans.addChild(new Cone(xf, yf, Cylinder.GENERATE_NORMALS | Cylinder.GENERATE_TEXTURE_COORDS | Cylinder.GENERATE_TEXTURE_COORDS_Y_UP, apBg));	
+		}else if(geom == 3){
+			object3dTrans.addChild(new Sphere(xf, Cylinder.GENERATE_NORMALS | Cylinder.GENERATE_TEXTURE_COORDS | Cylinder.GENERATE_TEXTURE_COORDS_Y_UP, apBg));
+		}else{
+			object3dTrans.addChild(new Cylinder(xf, yf, Cylinder.GENERATE_NORMALS | Cylinder.GENERATE_TEXTURE_COORDS | Cylinder.GENERATE_TEXTURE_COORDS_Y_UP, apBg));
+		}			
+		
+		return object3dTrans;
 	}
 }
