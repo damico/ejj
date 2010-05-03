@@ -3,3 +3,4 @@
 = Introduction =
 
  * How to create your own marker? [http://www.artoolworks.com/support/library/Creating_and_training_new_ARToolKit_markers]
+ * Configuring video capture in ARToolKit Professional on Linux [http://www.artoolworks.com/support/library/Configuring_video_capture_in_ARToolKit_Professiona]
